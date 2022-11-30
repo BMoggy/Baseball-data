@@ -1,0 +1,36 @@
+import pandas as pd
+import numpy as np
+from fastai.tabular import *
+from fastai.tabular.all import *
+df = pd.read_csv(r'training.csv')
+df_2 = pd.read_csv(r'deploy.csv')
+print (df)
+
+excluded =['ID','InPlay','Unnamed: 7','Unnamed: 8','Unnamed: 9','Unnamed: 10']
+cat_features = []
+cont_features = [c for c in df.columns.to_list() if c not in cat_features and c not in excluded]
+
+cont_features
+
+splits = RandomSplitter(valid_pct=0.3)(range_of(df))
+splits
+
+to = TabularPandas(df, procs=[Categorify, Normalize],
+                    y_names="InPlay",
+                    cat_names = cat_features,
+                    cont_names = cont_features,
+                   splits=splits)
+                   
+                   dls = to.dataloaders(bs=64)
+dls.show_batch()
+
+learn = tabular_learner(dls, metrics=mae, lr=10e-3)
+learn.lr_find()
+learn.show_results()
+
+pdf = df_2.copy()
+dl = learn.dls.test_dl(pdf)
+pdf['predicted'] = learn.get_preds(dl=dl)[0].numpy()
+pdf.head()
+
+pdf.to_excel(r'Predictions_2.xlsx')
