@@ -6,7 +6,7 @@ df = pd.read_csv(r'training.csv')
 df_2 = pd.read_csv(r'deploy.csv')
 print (df)
 
-excluded =['ID','InPlay','Unnamed: 7','Unnamed: 8','Unnamed: 9','Unnamed: 10']
+excluded =['ID','InPlay']
 cat_features = []
 cont_features = [c for c in df.columns.to_list() if c not in cat_features and c not in excluded]
 
